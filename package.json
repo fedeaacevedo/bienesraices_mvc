@@ -3,14 +3,16 @@
   "version": "1.0.0",
   "description": "Gestor de propiedades con Node",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "node index.js",
-    "server":"nodemon index"
+    "server": "nodemon index"
   },
   "author": "Federico Acevedo",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.1",
-    "nodemon": "^2.0.19"
+    "nodemon": "^2.0.19",
+    "pug": "^3.0.2"
   }
 }
