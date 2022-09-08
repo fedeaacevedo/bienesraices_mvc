@@ -16,11 +16,48 @@ const formularioRegistro = (req, res) => {
 
 const registrar = async(req, res) => {
     //Validar campos 
-    await check('nombre').notEmpty().run(req)
+    await check('nombre').notEmpty().withMessage('El nombre no puede quedar vacio').run(req)
+    await check('email').isEmail().withMessage('Debe ingresar un email valido').run(req)
+    await check('password').isLength({min:6}).withMessage('El password debe contener como minimo 6 caracteres').run(req)
+    await check('repetir_password').equals(req.body.password).withMessage('Los Passwords no son iguales').run(req)
 
-    
-    const usuario = await Usuario.create(req.body)
-    res.json(usuario)
+    let resultado = validationResult(req)
+
+    // return res.json(resultado.array)
+
+    //verificar que el resultado este vacio
+
+    if(!resultado.isEmpty()){
+        //Errores
+        return res.render('auth/registro',{
+            pagina: 'Crear Cuenta',
+            errores: resultado.array(),
+            //los campos quedan grabados en el form en caso de error
+            usuario:{
+                nombre: req.body.nombre,
+                email: req.body.email
+            }
+        })
+    }
+
+    //verificar que el usuario no este duplicado
+    const existeUsuario = await Usuario.findOne({where: { email : req.body.email }})
+
+    if(existeUsuario){
+        return res.render('auth/registro',{
+            pagina: 'Crear Cuenta',
+            errores: [{msg: 'El usuario ya esta registrado'}],
+            //los campos quedan grabados en el form en caso de error
+            usuario:{
+                nombre: req.body.nombre,
+                email: req.body.email
+            }
+    })
+}
+    console.log('existe usuario');
+
+    return;
+
 }
 
 const formularioOlvidePassword = (req, res) => {
@@ -28,6 +65,8 @@ const formularioOlvidePassword = (req, res) => {
         pagina: 'Restaurar Password'
     })
 }
+
+
 
 
 
