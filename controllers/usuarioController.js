@@ -1,5 +1,7 @@
 import { check, validationResult } from 'express-validator'
+import generarId from '../helpers/token.js'
 import Usuario from '../models/Usuario.js'
+
 
 //Utilizamos await porque estamos trabajando con la base de datos
 
@@ -64,9 +66,14 @@ const registrar = async (req, res) => {
         nombre,
         email, 
         password,
-        token: 123
+        token: generarId()
     })
 
+    //mostrar mensaje de confirmacion
+    res.render('templates/mensaje',{
+        pagina:'Cuenta creada correctamente',
+        mensaje:'Hemos enviado un email de confirmacion'
+    })
 }
 
 const formularioOlvidePassword = (req, res) => {
