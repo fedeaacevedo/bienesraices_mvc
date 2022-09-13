@@ -48,7 +48,7 @@ const registrar = async (req, res) => {
     const { nombre, email, password } = req.body
 
     //verificar que el usuario no este duplicado
-    const existeUsuario = await Usuario.findOne({ where: { email }})
+    const existeUsuario = await Usuario.findOne({ where: { email } })
 
     if (existeUsuario) {
         return res.render('auth/registro', {
@@ -65,23 +65,37 @@ const registrar = async (req, res) => {
     //Almacenar un usuario
     const usuario = await Usuario.create({
         nombre,
-        email, 
+        email,
         password,
         token: generarId()
     })
 
     //Envia email de confirmacion
     emailRegistro({
-        nombre:usuario.nombre,
+        nombre: usuario.nombre,
         email: usuario.email,
         token: usuario.token
     })
 
+
+
     //mostrar mensaje de confirmacion
-    res.render('templates/mensaje',{
-        pagina:'Cuenta creada correctamente',
-        mensaje:'Hemos enviado un email de confirmacion'
+    res.render('templates/mensaje', {
+        pagina: 'Cuenta creada correctamente',
+        mensaje: 'Hemos enviado un email de confirmacion'
     })
+}
+
+
+//funcion que comprueba una cuenta
+const confirmar = (req, res) => {
+    const {token} = req.params;
+    console.log(token)
+
+    //verificar si el token es valido
+
+    //confirmar la cuenta
+    
 }
 
 const formularioOlvidePassword = (req, res) => {
@@ -98,5 +112,6 @@ export {
     formularioLogin,
     formularioRegistro,
     registrar,
+    confirmar,
     formularioOlvidePassword
 }
