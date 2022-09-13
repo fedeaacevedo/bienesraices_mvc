@@ -38,6 +38,7 @@ const registrar = async (req, res) => {
         //Errores
         return res.render('auth/registro', {
             pagina: 'Crear Cuenta',
+            csrfToken: req.csrfToken(),
             errores: resultado.array(),
             //los campos quedan grabados en el form en caso de error
             usuario: {
@@ -56,6 +57,7 @@ const registrar = async (req, res) => {
     if (existeUsuario) {
         return res.render('auth/registro', {
             pagina: 'Crear Cuenta',
+            csrfToken: req.csrfToken(),
             errores: [{ msg: 'El usuario ya esta registrado' }],
             //los campos quedan grabados en el form en caso de error
             usuario: {
