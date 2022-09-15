@@ -200,11 +200,14 @@ const comprobarToken = async (req, res) => {
         })
     }
     //mostrar formulario para modificar password si el usuario es valido
-    
+    res.render('auth/reset-password',{
+      pagina: 'Reestablece tu Password',
+      csrfToken: req.csrfToken()
+    })
 }
 
 const nuevoPassword = (req, res) => {
-
+  console.log('Guardando password..');
 }
 
 export {
