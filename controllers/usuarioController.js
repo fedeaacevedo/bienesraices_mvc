@@ -1,4 +1,5 @@
 import { check, validationResult } from "express-validator";
+import bcrypt from 'bcrypt'
 import generarId from "../helpers/token.js";
 import Usuario from "../models/Usuario.js";
 import { emailRegistro, emailOlvidePassword } from "../helpers/email.js";
@@ -8,8 +9,36 @@ import { emailRegistro, emailOlvidePassword } from "../helpers/email.js";
 const formularioLogin = (req, res) => {
   res.render("auth/login", {
     pagina: "Iniciar Sesion",
+    csrfToken: req.csrfToken()
   });
 };
+
+const autenticar = async (req, res) => {
+    //validacion 
+    await check("email")
+    .isEmail()
+    .withMessage("Debe ingresar un email valido")
+    .run(req);
+  await check("password")
+    .notEmpty()
+    .withMessage("La contraseña es obligatoria")
+    .run(req);
+
+    let resultado = validationResult(req);
+
+  //verificar que el resultado este vacio
+
+  if (!resultado.isEmpty()) {
+    //Errores
+    return res.render("auth/login", {
+      pagina: "Iniciar Sesion",
+      csrfToken: req.csrfToken(),
+      errores: resultado.array()
+    });
+  }
+
+  };
+
 
 const formularioRegistro = (req, res) => {
   res.render("auth/registro", {
@@ -37,25 +66,7 @@ const registrar = async (req, res) => {
     .withMessage("Los Passwords no son iguales")
     .run(req);
 
-  let resultado = validationResult(req);
-
-  // return res.json(resultado.array)
-
-  //verificar que el resultado este vacio
-
-  if (!resultado.isEmpty()) {
-    //Errores
-    return res.render("auth/registro", {
-      pagina: "Crear Cuenta",
-      csrfToken: req.csrfToken(),
-      errores: resultado.array(),
-      //los campos quedan grabados en el form en caso de error
-      usuario: {
-        nombre: req.body.nombre,
-        email: req.body.email,
-      },
-    });
-  }
+  
 
   //extraer los datos
   const { nombre, email, password } = req.body;
@@ -206,12 +217,45 @@ const comprobarToken = async (req, res) => {
     })
 }
 
-const nuevoPassword = (req, res) => {
-  console.log('Guardando password..');
+const nuevoPassword = async (req, res) => {
+
+  //valirar nuevo password
+  await check("password").isLength({ min: 6 }).withMessage("El password debe contener como minimo 6 caracteres").run(req);
+
+  let resultado = validationResult(req);
+
+  if (!resultado.isEmpty()) {
+    //Errores
+    return res.render("auth/reset-password", {
+      pagina: "Reestablecer contraseña",
+      csrfToken: req.csrfToken(),
+      errores: resultado.array()  
+    });
+  }
+
+  const { token } = req.params
+  const { password } = req.body
+
+  //Identificar quien hace el cambio
+  const usuario = await Usuario.findOne({where: {token}})
+
+
+  //Hashear el nuevo password
+  const salt = await bcrypt.genSalt(10)
+  usuario.password= await bcrypt.hash(password, salt);
+  usuario.token = null;
+
+  await usuario.save();
+
+  res.render('auth/confirmar-cuenta',{
+    pagina: 'Contraseña reestablecida',
+    mensaje:'La contraseña se cambio correctamente'
+  })
 }
 
 export {
   formularioLogin,
+  autenticar,
   formularioRegistro,
   registrar,
   confirmar,
