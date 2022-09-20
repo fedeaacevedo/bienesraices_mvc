@@ -35,7 +35,40 @@ const autenticar = async (req, res) => {
       csrfToken: req.csrfToken(),
       errores: resultado.array()
     });
+  
   }
+
+  const {email, password} = req.body
+
+  //comprobar si el usuario existe
+  const usuario = await Usuario.findOne({where: {email} })
+  if(!usuario){
+    return res.render("auth/login", {
+      pagina: "Iniciar Sesion",
+      csrfToken: req.csrfToken(),
+      errores: [{msg:'Usuario y/o contraseña invalido'}]
+    });
+  }
+  //confirmar si el usuario esta confirmado
+  if(!usuario.confirmado){
+    return res.render("auth/login", {
+      pagina: "Iniciar Sesion",
+      csrfToken: req.csrfToken(),
+      errores: [{msg:'Debes validar tu cuenta para iniciar sesion'}]
+    });
+  }
+
+  //revisar el password
+  if(!usuario.verificarPassword(password)){
+    return res.render("auth/login", {
+      pagina: "Iniciar Sesion",
+      csrfToken: req.csrfToken(),
+      errores: [{msg:'Usuario y/o contraseña invalido'}]
+    });
+  }
+
+  //autenticar usuario
+  
 
   };
 
