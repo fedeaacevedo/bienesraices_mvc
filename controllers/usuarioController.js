@@ -76,7 +76,8 @@ const autenticar = async (req, res) => {
   //almacenar en un cookie
   return res.cookie('_token', token, {
     httpOnly: true,
-  //secure: true
+  //secure: true,
+  // sameSite: true,
   }).redirect('/mis-propiedades')
 
   };
